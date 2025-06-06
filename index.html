@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KI-Kompetenzen Selbsteinschätzung</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .question-container {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .question-container.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h2 {
+            color: #444;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+        
+        .options {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+        }
+        
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateX(5px);
+        }
+        
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        #results {
+            display: none;
+        }
+        
+        .result-section {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .result-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .level-indicator {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .competency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .competency-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .competency-item h4 {
+            color: #444;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .competency-level {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .recommendations {
+            background: #fff4e6;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 25px;
+            border-left: 5px solid #ff9800;
+        }
+        
+        .recommendations h3 {
+            color: #ff9800;
+            margin-bottom: 15px;
+        }
+        
+        .recommendation-list {
+            list-style: none;
+        }
+        
+        .recommendation-list li {
+            padding: 10px 0;
+            padding-left: 35px;
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .recommendation-checkbox {
+            position: absolute;
+            left: 0;
+            top: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .info-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+            transition: all 0.2s ease;
+        }
+        
+        .info-button:hover {
+            background: #5a67d8;
+            transform: scale(1.1);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            color: #667eea;
+            margin: 0;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .level-description {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .level-description h4 {
+            color: #667eea;
+            margin: 0 0 8px 0;
+        }
+        
+        .level-description p {
+            margin: 0;
+            color: #555;
+        }
+        
+        .name-input-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 12px;
+        }
+        
+        .name-input-container label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        .name-input-container input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .name-input-container input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .print-button {
+            margin-top: 20px;
+            width: 100%;
+            background: #4CAF50;
+        }
+        
+        .print-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
+            
+            .btn, .button-container {
+                display: none;
+            }
+            
+            .print-button {
+                display: none;
+            }
+            
+            .info-button {
+                display: none !important;
+            }
+            
+            .recommendation-checkbox {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="welcome" class="question-container active">
+            <h1>KI-Kompetenzen Selbsteinschätzung</h1>
+            <p class="subtitle">Entdecken Sie Ihre Stärken im Umgang mit Künstlicher Intelligenz in der Bildung</p>
+            <div style="margin-top: 40px; text-align: center;">
+                <p style="margin-bottom: 30px; color: #666;">Diese Einschätzung hilft Ihnen, Ihre aktuellen Kompetenzen im Bereich KI zu verstehen und zeigt Ihnen konkrete Entwicklungsmöglichkeiten auf.</p>
+                <button class="btn btn-primary" onclick="startAssessment()">Selbsteinschätzung starten</button>
+            </div>
+        </div>
+
+        <div id="assessment" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            
+            <div id="questions"></div>
+            
+            <div class="button-container">
+                <button class="btn btn-secondary" onclick="previousQuestion()" id="prevBtn" style="display: none;">Zurück</button>
+                <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn" disabled>Weiter</button>
+            </div>
+        </div>
+
+        <div id="results">
+            <h1>Ihre KI-Kompetenz-Analyse</h1>
+            <div class="name-input-container">
+                <label for="userName">Name (optional):</label>
+                <input type="text" id="userName" placeholder="Ihr Name">
+            </div>
+            <div id="resultContent"></div>
+            <button class="btn btn-primary print-button" onclick="window.print()">Ergebnisse drucken</button>
+        </div>
+    </div>
+
+    <!-- Modals für Informationen -->
+    <div id="falckFlickModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Modell nach Falck & Flick</h2>
+                <span class="close" onclick="closeModal('falckFlickModal')">&times;</span>
+            </div>
+            <div class="level-description">
+                <h4>Niveaustufe I - Basisniveau</h4>
+                <p>Grundlegende Kenntnisse und erste Erfahrungen mit KI. Sie beginnen, KI-Konzepte zu verstehen und einfache Tools zu erkunden.</p>
+            </div>
+            <div class="level-description">
+                <h4>Niveaustufe II - Vertiefte Kenntnisse</h4>
+                <p>Regelmäßige Anwendung von KI-Tools, kritische Reflexion und aktive Integration in die eigene Praxis. Sie können KI-Konzepte erklären und anwenden.</p>
+            </div>
+            <div class="level-description">
+                <h4>Niveaustufe III - Umfassende Expertise</h4>
+                <p>Expertenwissen mit Auswirkung über das eigene Umfeld hinaus. Sie entwickeln innovative Ansätze, beraten andere und gestalten die KI-Integration aktiv mit.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="digcompModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>DigCompEdu Kompetenzstufen</h2>
+                <span class="close" onclick="closeModal('digcompModal')">&times;</span>
+            </div>
+            <div class="level-description">
+                <h4>A1 - Newcomer</h4>
+                <p>Erste Kontakte mit digitalen Medien. Sie haben wenig Erfahrung und benötigen Anleitung.</p>
+            </div>
+            <div class="level-description">
+                <h4>A2 - Explorer</h4>
+                <p>Entdeckung digitaler Möglichkeiten. Sie experimentieren mit digitalen Technologien für die Lehre.</p>
+            </div>
+            <div class="level-description">
+                <h4>B1 - Integrator</h4>
+                <p>Integration in die Praxis. Sie nutzen digitale Medien in verschiedenen Kontexten.</p>
+            </div>
+            <div class="level-description">
+                <h4>B2 - Expert</h4>
+                <p>Strategische und umfassende Nutzung. Sie nutzen digitale Medien souverän und zielgerichtet.</p>
+            </div>
+            <div class="level-description">
+                <h4>C1 - Leader</h4>
+                <p>Führungsrolle bei digitalen Strategien. Sie entwickeln innovative Ansätze und unterstützen andere.</p>
+            </div>
+            <div class="level-description">
+                <h4>C2 - Pioneer</h4>
+                <p>Innovation und Forschung. Sie hinterfragen etablierte Praktiken und entwickeln neue Ansätze.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                text: "Wie vertraut sind Sie mit grundlegenden KI-Begriffen wie Machine Learning, Neuronale Netze oder Algorithmen?",
+                options: [
+                    "Ich kenne diese Begriffe nicht oder nur oberflächlich",
+                    "Ich verstehe die Grundkonzepte und kann sie einfach erklären",
+                    "Ich kann diese Konzepte detailliert erläutern und ihre Funktionsweisen beschreiben",
+                    "Ich beherrsche die technischen Details und kann komplexe Zusammenhänge erklären"
+                ],
+                models: {
+                    falckFlick: { area: "verstehen", weight: 1 },
+                    digcomp: { area: "digitalResources", weight: 0.5 }
+                }
+            },
+            {
+                id: 2,
+                text: "Wie nutzen Sie KI-Tools in Ihrer täglichen Arbeit oder Lehrtätigkeit?",
+                options: [
+                    "Ich nutze noch keine KI-Tools",
+                    "Ich experimentiere gelegentlich mit einfachen KI-Tools",
+                    "Ich setze regelmäßig KI-Tools für spezifische Aufgaben ein",
+                    "Ich integriere KI-Tools systematisch und entwickle eigene Anwendungsszenarien"
+                ],
+                models: {
+                    falckFlick: { area: "anwenden", weight: 1 },
+                    digcomp: { area: "teachingLearning", weight: 1 }
+                }
+            },
+            {
+                id: 3,
+                text: "Wie gehen Sie mit ethischen Fragen beim Einsatz von KI um?",
+                options: [
+                    "Ich habe mich noch nicht mit ethischen Aspekten beschäftigt",
+                    "Ich erkenne ethische Herausforderungen und versuche verantwortungsvoll zu handeln",
+                    "Ich diskutiere aktiv ethische Fragen und prüfe KI-Tools kritisch",
+                    "Ich entwickle Richtlinien und berate andere zu ethischen KI-Fragen"
+                ],
+                models: {
+                    falckFlick: { area: "reflektieren", weight: 1 },
+                    digcomp: { area: "digitalCompetence", weight: 0.8 }
+                }
+            },
+            {
+                id: 4,
+                text: "Wie unterstützen Sie Lernende beim Umgang mit KI?",
+                options: [
+                    "Ich vermittle noch keine KI-bezogenen Inhalte",
+                    "Ich führe grundlegende KI-Konzepte ein",
+                    "Ich gestalte Lernaktivitäten mit KI-Tools und fördere kritisches Denken",
+                    "Ich entwickle umfassende KI-Curricula und innovative Lernszenarien"
+                ],
+                models: {
+                    falckFlick: { area: "mitgestalten", weight: 0.8 },
+                    digcomp: { area: "empoweringLearners", weight: 1 }
+                }
+            },
+            {
+                id: 5,
+                text: "Wie bewerten Sie Ihre Fähigkeit, KI-gestützte Lernmaterialien zu erstellen?",
+                options: [
+                    "Ich habe noch keine Erfahrung damit",
+                    "Ich kann einfache KI-generierte Inhalte anpassen",
+                    "Ich erstelle regelmäßig qualitativ hochwertige KI-gestützte Materialien",
+                    "Ich entwickle innovative KI-basierte Lernressourcen und teile Best Practices"
+                ],
+                models: {
+                    falckFlick: { area: "anwenden", weight: 0.8 },
+                    digcomp: { area: "digitalResources", weight: 1 }
+                }
+            },
+            {
+                id: 6,
+                text: "Wie nutzen Sie KI für die Bewertung und Feedback?",
+                options: [
+                    "Ich nutze KI noch nicht für Bewertungen",
+                    "Ich experimentiere mit einfachen KI-Bewertungstools",
+                    "Ich setze KI-Tools regelmäßig für effiziente Bewertungen ein",
+                    "Ich entwickle innovative KI-gestützte Bewertungsstrategien"
+                ],
+                models: {
+                    falckFlick: { area: "anwenden", weight: 0.7 },
+                    digcomp: { area: "assessment", weight: 1 }
+                }
+            },
+            {
+                id: 7,
+                text: "Wie fördern Sie die digitale Kompetenz Ihrer Lernenden in Bezug auf KI?",
+                options: [
+                    "Das ist noch kein Schwerpunkt meiner Arbeit",
+                    "Ich vermittle grundlegende KI-Kenntnisse",
+                    "Ich integriere KI-Kompetenz systematisch in meinen Unterricht",
+                    "Ich leite umfassende Programme zur KI-Kompetenzentwicklung"
+                ],
+                models: {
+                    falckFlick: { area: "mitgestalten", weight: 1 },
+                    digcomp: { area: "digitalCompetence", weight: 1 }
+                }
+            },
+            {
+                id: 8,
+                text: "Wie engagieren Sie sich in der beruflichen Weiterentwicklung zu KI-Themen?",
+                options: [
+                    "Ich habe noch keine KI-bezogenen Fortbildungen besucht",
+                    "Ich nehme gelegentlich an KI-Workshops teil",
+                    "Ich bilde mich regelmäßig fort und tausche mich mit Kollegen aus",
+                    "Ich gestalte Fortbildungen und bin als KI-Experte anerkannt"
+                ],
+                models: {
+                    falckFlick: { area: "reflektieren", weight: 0.7 },
+                    digcomp: { area: "professionalEngagement", weight: 1 }
+                }
+            },
+            {
+                id: 9,
+                text: "Wie gehen Sie mit KI-generierten Informationen kritisch um?",
+                options: [
+                    "Ich hinterfrage KI-Ergebnisse selten",
+                    "Ich prüfe gelegentlich die Plausibilität von KI-Ausgaben",
+                    "Ich analysiere systematisch KI-generierte Inhalte auf Qualität und Bias",
+                    "Ich forsche zu KI-Verzerrungen und entwickle Bewertungskriterien"
+                ],
+                models: {
+                    falckFlick: { area: "reflektieren", weight: 1 },
+                    digcomp: { area: "digitalCompetence", weight: 0.7 }
+                }
+            },
+            {
+                id: 10,
+                text: "Wie gestalten Sie die Integration von KI in Ihrer Institution mit?",
+                options: [
+                    "Ich bin noch nicht aktiv in die KI-Integration eingebunden",
+                    "Ich bringe Ideen ein und teste KI-Anwendungen",
+                    "Ich leite KI-Projekte und unterstütze Kollegen aktiv",
+                    "Ich entwickle KI-Strategien und beeinflusse die institutionelle Politik"
+                ],
+                models: {
+                    falckFlick: { area: "mitgestalten", weight: 1 },
+                    digcomp: { area: "professionalEngagement", weight: 0.8 }
+                }
+            },
+            {
+                id: 11,
+                text: "Wie personalisieren Sie Lernerfahrungen mit Hilfe von KI?",
+                options: [
+                    "Ich nutze noch keine KI für Personalisierung",
+                    "Ich erkunde erste Möglichkeiten der KI-gestützten Differenzierung",
+                    "Ich setze adaptive KI-Systeme gezielt ein",
+                    "Ich entwickle innovative personalisierte Lernumgebungen mit KI"
+                ],
+                models: {
+                    falckFlick: { area: "anwenden", weight: 0.8 },
+                    digcomp: { area: "empoweringLearners", weight: 1 }
+                }
+            },
+            {
+                id: 12,
+                text: "Wie sicher fühlen Sie sich im Umgang mit Datenschutz bei KI-Anwendungen?",
+                options: [
+                    "Ich kenne mich mit Datenschutzaspekten kaum aus",
+                    "Ich beachte grundlegende Datenschutzregeln",
+                    "Ich kann Datenschutzrisiken bewerten und minimieren",
+                    "Ich berate andere zu Datenschutz und entwickle Sicherheitskonzepte"
+                ],
+                models: {
+                    falckFlick: { area: "reflektieren", weight: 0.8 },
+                    digcomp: { area: "professionalEngagement", weight: 0.7 }
+                }
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = {};
+
+        function startAssessment() {
+            document.getElementById('welcome').style.display = 'none';
+            document.getElementById('assessment').style.display = 'block';
+            showQuestion(0);
+        }
+
+        function showQuestion(index) {
+            const questionsDiv = document.getElementById('questions');
+            const question = questions[index];
+            
+            questionsDiv.innerHTML = `
+                <div class="question-container active">
+                    <h2>Frage ${index + 1} von ${questions.length}</h2>
+                    <p style="font-size: 1.1em; margin-bottom: 20px;">${question.text}</p>
+                    <div class="options">
+                        ${question.options.map((option, i) => `
+                            <div class="option ${answers[question.id] === i ? 'selected' : ''}" 
+                                 onclick="selectOption(${question.id}, ${i})">
+                                ${option}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            updateProgress();
+            updateButtons();
+        }
+
+        function selectOption(questionId, optionIndex) {
+            answers[questionId] = optionIndex;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === optionIndex);
+            });
+            updateButtons();
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.style.display = currentQuestion > 0 ? 'block' : 'none';
+            nextBtn.disabled = !answers.hasOwnProperty(questions[currentQuestion].id);
+            
+            if (currentQuestion === questions.length - 1) {
+                nextBtn.textContent = 'Auswertung anzeigen';
+            } else {
+                nextBtn.textContent = 'Weiter';
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion(currentQuestion);
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            } else {
+                showResults();
+            }
+        }
+
+        function calculateResults() {
+            // Falck/Flick Modell
+            const falckFlickScores = {
+                verstehen: { score: 0, count: 0 },
+                anwenden: { score: 0, count: 0 },
+                reflektieren: { score: 0, count: 0 },
+                mitgestalten: { score: 0, count: 0 }
+            };
+
+            // DigCompEdu Modell
+            const digcompScores = {
+                professionalEngagement: { score: 0, count: 0 },
+                digitalResources: { score: 0, count: 0 },
+                teachingLearning: { score: 0, count: 0 },
+                assessment: { score: 0, count: 0 },
+                empoweringLearners: { score: 0, count: 0 },
+                digitalCompetence: { score: 0, count: 0 }
+            };
+
+            // Berechne Scores
+            questions.forEach(q => {
+                const answer = answers[q.id];
+                if (answer !== undefined) {
+                    // Falck/Flick
+                    const ffArea = q.models.falckFlick.area;
+                    const ffWeight = q.models.falckFlick.weight;
+                    falckFlickScores[ffArea].score += (answer / 3) * ffWeight;
+                    falckFlickScores[ffArea].count += ffWeight;
+
+                    // DigCompEdu
+                    const dcArea = q.models.digcomp.area;
+                    const dcWeight = q.models.digcomp.weight;
+                    digcompScores[dcArea].score += (answer / 3) * dcWeight;
+                    digcompScores[dcArea].count += dcWeight;
+                }
+            });
+
+            // Normalisiere Scores
+            Object.keys(falckFlickScores).forEach(key => {
+                if (falckFlickScores[key].count > 0) {
+                    falckFlickScores[key].average = falckFlickScores[key].score / falckFlickScores[key].count;
+                }
+            });
+
+            Object.keys(digcompScores).forEach(key => {
+                if (digcompScores[key].count > 0) {
+                    digcompScores[key].average = digcompScores[key].score / digcompScores[key].count;
+                }
+            });
+
+            return { falckFlickScores, digcompScores };
+        }
+
+        function getFalckFlickLevel(score) {
+            if (score < 0.33) return "Niveaustufe I";
+            if (score < 0.67) return "Niveaustufe II";
+            return "Niveaustufe III";
+        }
+
+        function getDigCompLevel(score) {
+            if (score < 0.17) return "A1 - Newcomer";
+            if (score < 0.33) return "A2 - Explorer";
+            if (score < 0.50) return "B1 - Integrator";
+            if (score < 0.67) return "B2 - Expert";
+            if (score < 0.83) return "C1 - Leader";
+            return "C2 - Pioneer";
+        }
+
+        function getRecommendations(falckFlickScores, digcompScores) {
+            const recommendations = [];
+            
+            // Falck/Flick Empfehlungen
+            Object.entries(falckFlickScores).forEach(([area, data]) => {
+                if (data.average < 0.67) {
+                    switch(area) {
+                        case 'verstehen':
+                            recommendations.push("Vertiefen Sie Ihr KI-Grundlagenwissen durch Online-Kurse oder Fachliteratur");
+                            break;
+                        case 'anwenden':
+                            recommendations.push("Experimentieren Sie mehr mit verschiedenen KI-Tools in Ihrer Praxis");
+                            break;
+                        case 'reflektieren':
+                            recommendations.push("Nehmen Sie an Diskussionen über ethische KI-Nutzung teil");
+                            break;
+                        case 'mitgestalten':
+                            recommendations.push("Werden Sie aktiver bei der KI-Integration in Ihrer Institution");
+                            break;
+                    }
+                }
+            });
+
+            // DigCompEdu Empfehlungen
+            Object.entries(digcompScores).forEach(([area, data]) => {
+                if (data.average < 0.5) {
+                    switch(area) {
+                        case 'professionalEngagement':
+                            recommendations.push("Nutzen Sie KI-Tools für Ihre berufliche Vernetzung und Entwicklung");
+                            break;
+                        case 'digitalResources':
+                            recommendations.push("Lernen Sie, KI-gestützte Lernmaterialien zu erstellen und zu bewerten");
+                            break;
+                        case 'teachingLearning':
+                            recommendations.push("Integrieren Sie KI-Tools systematischer in Ihre Lehrmethoden");
+                            break;
+                        case 'assessment':
+                            recommendations.push("Erkunden Sie KI-basierte Bewertungstools für effizienteres Feedback");
+                            break;
+                        case 'empoweringLearners':
+                            recommendations.push("Entwickeln Sie Strategien zur personalisierten Lernunterstützung mit KI");
+                            break;
+                        case 'digitalCompetence':
+                            recommendations.push("Stärken Sie die KI-Kompetenzen Ihrer Lernenden durch gezielte Aktivitäten");
+                            break;
+                    }
+                }
+            });
+
+            return recommendations;
+        }
+
+        function showResults() {
+            document.getElementById('assessment').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            const { falckFlickScores, digcompScores } = calculateResults();
+            const recommendations = getRecommendations(falckFlickScores, digcompScores);
+            
+            const resultContent = document.getElementById('resultContent');
+            
+            // Falck/Flick Ergebnisse
+            let ffHtml = `
+                <div class="result-section">
+                    <h3>Ihre Einstufung nach dem Modell von Falck & Flick
+                        <button class="info-button" onclick="openModal('falckFlickModal')" title="Mehr Informationen">i</button>
+                    </h3>
+                    <div class="competency-grid">
+            `;
+            
+            const ffLabels = {
+                verstehen: "Verstehen",
+                anwenden: "Anwenden",
+                reflektieren: "Reflektieren",
+                mitgestalten: "Mitgestalten"
+            };
+            
+            Object.entries(falckFlickScores).forEach(([area, data]) => {
+                if (data.count > 0) {
+                    ffHtml += `
+                        <div class="competency-item">
+                            <h4>${ffLabels[area]}</h4>
+                            <div class="competency-level">${getFalckFlickLevel(data.average)}</div>
+                        </div>
+                    `;
+                }
+            });
+            
+            ffHtml += `
+                    </div>
+                </div>
+            `;
+            
+            // DigCompEdu Ergebnisse
+            let dcHtml = `
+                <div class="result-section">
+                    <h3>Ihre Einstufung nach dem DigCompEdu-Modell
+                        <button class="info-button" onclick="openModal('digcompModal')" title="Mehr Informationen">i</button>
+                    </h3>
+                    <div class="competency-grid">
+            `;
+            
+            const dcLabels = {
+                professionalEngagement: "Berufliches Engagement",
+                digitalResources: "Digitale Ressourcen",
+                teachingLearning: "Lehren und Lernen",
+                assessment: "Bewertung",
+                empoweringLearners: "Förderung der Lernenden",
+                digitalCompetence: "Digitale Kompetenz der Lernenden"
+            };
+            
+            Object.entries(digcompScores).forEach(([area, data]) => {
+                if (data.count > 0) {
+                    dcHtml += `
+                        <div class="competency-item">
+                            <h4>${dcLabels[area]}</h4>
+                            <div class="competency-level">${getDigCompLevel(data.average)}</div>
+                        </div>
+                    `;
+                }
+            });
+            
+            dcHtml += `
+                    </div>
+                </div>
+            `;
+            
+            // Empfehlungen mit Checkboxen
+            let recHtml = `
+                <div class="recommendations">
+                    <h3>Ihre persönlichen Entwicklungsempfehlungen</h3>
+                    <p style="margin-bottom: 15px; color: #666;">Markieren Sie erledigte Schritte:</p>
+                    <ul class="recommendation-list">
+            `;
+            
+            recommendations.forEach((rec, index) => {
+                recHtml += `
+                    <li>
+                        <input type="checkbox" class="recommendation-checkbox" id="rec-${index}">
+                        <label for="rec-${index}" style="cursor: pointer;">${rec}</label>
+                    </li>
+                `;
+            });
+            
+            recHtml += `
+                    </ul>
+                </div>
+            `;
+            
+            resultContent.innerHTML = ffHtml + dcHtml + recHtml;
+        }
+        
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Schließe Modal beim Klick außerhalb
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
